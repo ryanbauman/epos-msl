@@ -18,6 +18,7 @@
     ckan_admin_password: admin
     ckan_harvest_password: harvest
     epos_msl_environment: default
+    epos_msl_fqdn: "{{ ansible_default_ipv4.address }}"
   roles:
     - common
     - certificates
