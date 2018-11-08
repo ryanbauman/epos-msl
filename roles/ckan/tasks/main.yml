@@ -85,10 +85,9 @@
     state: yes
     persistent: yes
 
-
 - name: Allow Apache to listen on port 8983 for Solr
   seport:
-    ports: 8888
+    ports: 8983
     proto: tcp
     setype: http_port_t
     state: present
@@ -154,6 +153,7 @@
   notify: Restart Apache webserver
   when: not ansible_check_mode
 
+- meta: flush_handlers
 
 - name: Ensure CKAN schema is symlinked in Solr
   become_user: root
@@ -165,6 +165,7 @@
   register: link_schema
   notify: Restart Solr
 
+- meta: flush_handlers
 
 - name: Ensure CKAN who.ini is symlinked
   become_user: root
@@ -189,6 +190,7 @@
     creates=/usr/lib/ckan/default/src/ckanext-harvest/
   notify: Restart Apache webserver
 
+- meta: flush_handlers
 
 - name: Ensure latest version of CKAN harvest extension is installed
   become_user: root
@@ -200,6 +202,7 @@
     update: "yes"
   notify: Restart Apache webserver
 
+- meta: flush_handlers
 
 - name: Install CKAN OAI-PMH extension
   become_user: root
@@ -216,6 +219,7 @@
     creates=/usr/lib/ckan/default/src/ckanext-oaipmh/
   notify: Restart Apache webserver
 
+- meta: flush_handlers
 
 - name: Ensure latest version of CKAN OAI-PMH extension is installed
   become_user: root
@@ -227,28 +231,29 @@
     update: "yes"
   notify: Restart Apache webserver
 
+- meta: flush_handlers
 
-- name: Install EPOS-MSL custom CKAN theme
-  become_user: root
-  become: yes
-  shell: |
-    su -s /bin/bash - ckan
-    cd /usr/lib/ckan
-    . default/bin/activate
-    pip install -e git+https://github.com/UtrechtUniversity/epos-msl-theme.git@{{ ckanext_custom_theme_version }}#egg=ckanext-custom_theme
-    exit
-    creates=/usr/lib/ckan/default/src/ckanext-custom-theme/
-  notify: Restart Apache webserver
+  #- name: Install EPOS-MSL custom CKAN theme
+  #become_user: root
+  #become: yes
+  #shell: |
+  #  su -s /bin/bash - ckan
+  #  cd /usr/lib/ckan
+  #  . default/bin/activate
+  # pip install -e git+https://github.com/UtrechtUniversity/epos-msl-theme.git@{{ ckanext_custom_theme_version }}#egg=ckanext-custom_theme
+  #  exit
+  #  creates=/usr/lib/ckan/default/src/ckanext-custom-theme/
+  #notify: Restart Apache webserver
 
 
-- name: Ensure latest version of EPOS-MSL custom CKAN theme is installed
-  become_user: root
-  become: yes
-  git:
-    repo: "https://github.com/UtrechtUniversity/epos-msl-theme.git"
-    dest: "/usr/lib/ckan/default/src/ckanext-custom-theme/"
-    version: "{{ ckanext_custom_theme_version }}"
-    update: "yes"
+  #- name: Ensure latest version of EPOS-MSL custom CKAN theme is installed
+  #become_user: root
+  #become: yes
+  #git:
+  #  repo: "https://github.com/UtrechtUniversity/epos-msl-theme.git"
+  #  dest: "/usr/lib/ckan/default/src/ckanext-custom-theme/"
+  #  version: "{{ ckanext_custom_theme_version }}"
+  #  update: "yes"
 
 
 - name: Initialize CKAN database
@@ -317,6 +322,7 @@
     dest: "/etc/ckan/default/apache.wsgi"
   notify: Restart Apache webserver
 
+- meta: flush_handlers
 
 - name: Ensure EPOS-MSL virtual host config for Apache is present
   template:
@@ -324,35 +330,36 @@
     dest: "/etc/httpd/conf.d/epos-msl-vhost.conf"
   notify: Restart Apache webserver
 
+- meta: flush_handlers
 
-- name: Ensure EPOS-MSL CKAN custom translation is present
-  become_user: ckan
-  copy:
-    src: '{{ item.src }}'
-    dest: '{{ item.dest }}'
-    mode: 0644
-  with_items:
-    - src: 'ckan.po'
-      dest: '/usr/lib/ckan/default/src/ckan/ckan/i18n/en_GB/LC_MESSAGES/ckan.po'
-    - src: 'ckan.mo'
-      dest: '/usr/lib/ckan/default/src/ckan/ckan/i18n/en_GB/LC_MESSAGES/ckan.mo'
-  register: custom_translation
-  notify: Restart Apache webserver
-
-
-- name: Workaround translation problem
-  command: cp /usr/lib/ckan/default/src/ckan/ckan/public/base/i18n/en_AU.js /usr/lib/ckan/default/src/ckan/ckan/public/base/i18n/en_GB.js
-  when: custom_translation is changed
+  #- name: Ensure EPOS-MSL CKAN custom translation is present
+  #become_user: ckan
+  #copy:
+  #  src: '{{ item.src }}'
+  #  dest: '{{ item.dest }}'
+  #  mode: 0644
+  #with_items:
+  #  - src: 'ckan.po'
+  #    dest: '/usr/lib/ckan/default/src/ckan/ckan/i18n/en_GB/LC_MESSAGES/ckan.po'
+  #  - src: 'ckan.mo'
+  #    dest: '/usr/lib/ckan/default/src/ckan/ckan/i18n/en_GB/LC_MESSAGES/ckan.mo'
+  #register: custom_translation
+  #notify: Restart Apache webserver
 
 
-- name: Ensure CKAN ICS API directory is present
-  file:
-    path: /var/www/api
-    state: directory
-    mode: 0711
+  #- name: Workaround translation problem
+  #command: cp /usr/lib/ckan/default/src/ckan/ckan/public/base/i18n/en_AU.js /usr/lib/ckan/default/src/ckan/ckan/public/base/i18n/en_GB.js
+  #when: custom_translation is changed
 
 
-- name: Ensure CKAN ICS API is present
-  template:
-    src: "api.php.j2"
-    dest: "/var/www/api/api.php"
+  #- name: Ensure CKAN ICS API directory is present
+  #file:
+  #  path: /var/www/api
+  #  state: directory
+  #  mode: 0711
+  #
+  #
+ #name: Ensure CKAN ICS API is present
+ #template:
+ #  src: "api.php.j2"
+ ##  dest: "/var/www/api/api.php"

@@ -12,14 +12,6 @@
     ServerName {{ epos_msl_fqdn }}
     WSGIScriptAlias / /etc/ckan/default/apache.wsgi
 
-    # PHP EPOS ICS API
-    Alias /ics "/var/www/api/"
-
-    <Directory "/var/www/api/">
-        AllowOverride All
-        Require all granted
-    </Directory>
-
     # Pass authorization info on (needed for rest api).
     WSGIPassAuthorization On
 
